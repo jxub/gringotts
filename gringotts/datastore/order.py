@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import uuid
 import attr
 
-from typing import Optional
+from typing import Optional, Tuple
 
 from gringotts.datastore import Amount, Ratio, Account
 
@@ -44,20 +46,45 @@ class Order:
             uuid=self.uuid,
         )
 
-    def split(self, amount):
+    def split(self, amount) -> Tuple[Order, Order]:
         received_amount = self.received_amount / self.offered_amount * amount
 
         filled = Order(
-
+            account=self.account,
+            offered_currency=self.offered_currency,
+            offered_amount=amount,
+            received_currency=self.received_currency,
+            received_amount=received_amount,
+            uuid=self.uuid
         )
 
-        remaining = Order()
+        remaining = Order(
+            account=self.account,
+            offered_currency=self.offered_currency,
+            offered_amount=self.offered_amount - amount,
+            received_currency=self.received_currency,
+            received_amount=self.received_amount - received_amount
+        )
 
         return filled, remaining
 
     def create_snapshot(self):
-        return attr.asdict(self)
+        return {
+            'account_id': self.account.uuid if self.account.uuid else self.account,
+            'offered_currency': self.offered_currency,
+            'offered_amount': str(self.offered_amount),
+            'received_currency': self.received_currency,
+            'received_amount': str(self.received_amount),
+            'uuid': self.uuid,
+        }
 
     @staticmethod
     def load_snapshot(snap):
-        return Order(uuid=snap['uuid'])  # TODO
+        return Order(
+            account=snap['account_id'],
+            offered_currency=snap['offered_currency'],
+            offered_amount=Amount.load_snapshot(snap['offered_amount']),
+            received_currency=snap['received_currency'],
+            received_amount=Amount.load_snapshot(snap['received_amount']),
+            uuid=snap['uuid'],
+        )

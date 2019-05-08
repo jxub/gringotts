@@ -5,7 +5,7 @@ import copy
 @attr.s(init=False)
 class Amount(int):
 
-    def __init__(self, num):
+    def __init__(self, num: int):
         super().__init__(num)
 
     def clone(self):
@@ -16,7 +16,7 @@ class Amount(int):
 
     @staticmethod
     def load_snapshot(data):
-        return Amount(data)
+        return Amount(int(data))
 
     @staticmethod
     def zero():

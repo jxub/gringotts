@@ -7,7 +7,9 @@ from typing import List, Optional
 
 @attr.s
 class BookStore:
-    pass
+    @staticmethod
+    def load_snapshot(data):
+        return ''  # TODO
 
 
 
@@ -23,6 +25,11 @@ class OrderBook:
         amount_filled = Ratio()
         # TODO
 
+        return []
+
     @staticmethod
     def load_snapshot(data):
-        return str(data)  # todo
+        book = OrderBook()
+        book.store = BookStore.load_snapshot(data=data['store'])
+
+        return book
